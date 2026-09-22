@@ -104,10 +104,22 @@ def process_document(path):
     )
 
     # vector embeddeing store
-    vector_store = InMemoryVectorStore.from_documents(
-        documents=splitted_chunk,
-        embedding=embedding
-    )
+    try:
+        vector_store = InMemoryVectorStore.from_documents(
+            documents=splitted_chunk,
+            embedding=embedding
+        )
+    except Exception as error:
+        error_message = str(error).lower()
+
+        if "429" in error_message or "resource has been exhausted" in error_message:
+            st.error("Gemini embedding quota is reached. Wait a moment and try again, or check your Gemini API quota.")
+        elif "api key" in error_message or "403" in error_message:
+            st.error("Gemini API key is not allowed to create embeddings. Check GOOGLE_API_KEY in Streamlit Secrets.")
+        else:
+            st.error("Gemini could not process this PDF. Check your Google API key and Gemini API quota, then try again.")
+
+        st.stop()
 
     # for create agent - tool, llm, prompt
 
