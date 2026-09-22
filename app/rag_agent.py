@@ -97,7 +97,7 @@ def process_document(path):
     # vector embedding
     embedding = GoogleGenerativeAIEmbeddings(
         model="gemini-embedding-001",
-        api_key=GROQ_API_KEY
+        api_key=google_api_key
     )
 
     # vector embeddeing store
