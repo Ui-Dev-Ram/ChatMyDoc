@@ -1,6 +1,8 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+import os
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -60,8 +62,33 @@ st.caption("Upload your PDF files and ask anything from your documents.")
 st.divider()
 
 
+def get_secret(key):
+    value = os.getenv(key)
+    if value:
+        return value
+
+    try:
+        return st.secrets.get(key)
+    except FileNotFoundError:
+        return None
+
+
 
 def process_document(path):
+    google_api_key = get_secret("GOOGLE_API_KEY")
+    groq_api_key = get_secret("GROQ_API_KEY")
+
+    missing_keys = []
+    if not google_api_key:
+        missing_keys.append("GOOGLE_API_KEY")
+    if not groq_api_key:
+        missing_keys.append("GROQ_API_KEY")
+
+    if missing_keys:
+        st.error(f"Missing secret: {', '.join(missing_keys)}")
+        st.info("Add the missing key in your Streamlit Cloud app Settings → Secrets, then reboot the app.")
+        st.stop()
+
     # load the documents
     loader = PyPDFDirectoryLoader(path)
     docs = loader.load()
@@ -71,7 +98,10 @@ def process_document(path):
     splitted_chunk = splitter.split_documents(documents=docs)
 
     # vector embedding
-    embedding = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
+    embedding = GoogleGenerativeAIEmbeddings(
+        model="gemini-embedding-001",
+        api_key=google_api_key
+    )
 
     # vector embeddeing store
     vector_store = InMemoryVectorStore.from_documents(
@@ -81,7 +111,7 @@ def process_document(path):
 
     # for create agent - tool, llm, prompt
 
-    llm = ChatGroq(model="openai/gpt-oss-20b")
+    llm = ChatGroq(model="openai/gpt-oss-20b", api_key=groq_api_key)
 
     @tool
     def retrieve_context(query:str):
