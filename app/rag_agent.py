@@ -75,9 +75,12 @@ def get_secret(key):
 
 
 def process_document(path):
+    google_api_key = get_secret("GOOGLE_API_KEY")
     groq_api_key = get_secret("GROQ_API_KEY")
 
     missing_keys = []
+    if not google_api_key:
+        missing_keys.append("GOOGLE_API_KEY")
     if not groq_api_key:
         missing_keys.append("GROQ_API_KEY")
 
