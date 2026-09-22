@@ -27,7 +27,6 @@ pip install -r requirements.txt
 Create a `.env` file from `.env.example` and add your keys.
 
 ```env
-GOOGLE_API_KEY=your_google_api_key
 GROQ_API_KEY=your_groq_api_key
 ```
 
@@ -45,7 +44,6 @@ streamlit run app/rag_agent.py
 4. In **Advanced settings → Secrets**, add:
 
 ```toml
-GOOGLE_API_KEY = "your_google_api_key"
 GROQ_API_KEY = "your_groq_api_key"
 ```
 
